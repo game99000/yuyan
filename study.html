@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fbfbfc">
+<title>背诵 · 语言学习包</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.setup{padding-top:26px}
+.setup h1{margin:0 0 10px;font-size:25px;letter-spacing:-.02em}
+.setup p.sub{margin:0 0 22px;color:var(--muted);font-size:14px}
+.field{margin-bottom:18px}
+.field .lbl{font-size:12.5px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.seg{display:flex;gap:7px}
+.seg button{flex:1 1 0;min-width:0;font:inherit;font-size:13.5px;padding:10px 4px;white-space:nowrap;text-align:center;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.seg button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+.go{display:block;width:100%;margin-top:8px;padding:15px;border:0;border-radius:14px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+.go:disabled{opacity:.5}
+.ring{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:18px}
+.ring .dial{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--accent);background:conic-gradient(var(--accent) 0deg, var(--line2) 0deg);position:relative;flex:0 0 auto}
+.ring .dial i{position:absolute;inset:6px;background:#fff;border-radius:50%;display:grid;place-items:center;font-style:normal}
+.ring .txt b{display:block;font-size:15px}
+.ring .txt span{font-size:12.5px;color:var(--muted)}
+
+/* 卡片 */
+.study{display:none;flex-direction:column;min-height:100vh;padding:0 0 20px}
+.study.on{display:flex}
+.sbar{display:flex;align-items:center;gap:10px;padding:10px 0 8px}
+.sbar .pbar{flex:1;height:6px;border-radius:99px;background:var(--line2);overflow:hidden}
+.sbar .pbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .3s}
+.sbar .cnt{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cardstage{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 0}
+.wcard{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 18px 40px -28px rgba(15,20,30,.3)}
+.wcard .w{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.25;word-break:break-word}
+.wcard .sub{color:var(--amber);font-size:16px;margin-top:6px;visibility:hidden;min-height:22px}
+.wcard.rev .sub{visibility:visible}
+.wcard .sub.ipa{font-family:var(--mono);font-size:15px;color:#6a5c40}
+.wcard .cn{font-size:19px;margin-top:14px;color:var(--ink2);display:none}
+.wcard .ex{display:none;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line2);text-align:left}
+.wcard .ex .a{font-size:15px;color:#39404e;line-height:1.55}
+.wcard .ex .b{font-size:13.5px;color:var(--muted);margin-top:4px}
+.wcard.rev .cn,.wcard.rev .ex{display:block}
+.wcard .tag{margin-top:14px;display:inline-block;font-size:11.5px;color:var(--muted);background:#f5f6f9;padding:3px 9px;border-radius:6px}
+.btns{display:flex;gap:10px;margin-top:12px}
+.btns button{flex:1;padding:15px;border-radius:14px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2)}
+.btns .again{border-color:#f0dcc0;background:#fdf7ea;color:#8a5a00}
+.btns .known{border-color:var(--accent);background:var(--accent);color:#fff}
+.reveal{display:block;width:100%;margin-top:12px;padding:15px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--accent);font:inherit;font-size:15px;cursor:pointer}
+.playw{margin-top:16px;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 15px;font:inherit;font-size:13.5px;color:var(--accent);cursor:pointer}
+.done{padding:40px 0;text-align:center}
+.done h2{margin:0 0 6px;font-size:22px}
+.done .big{font-size:40px;font-weight:700;color:var(--accent);letter-spacing:-.02em;margin:14px 0 2px}
+.done .lbl{color:var(--muted);font-size:13px}
+.done .rows{margin:22px 0;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px 16px}
+.done .rows div{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.done .rows div:last-child{border-bottom:0}
+.done .rows b{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 设置 -->
+  <section class="setup" id="setup">
+    <h1>开始背一组</h1>
+    <p class="sub">一次只出现一个词，先自己回忆，再翻面看答案。会了点「记住了」，没把握点「再来一次」——它会排到后面重考。</p>
+
+    <div class="ring">
+      <div class="dial" id="dial"><i id="dialTxt">0%</i></div>
+      <div class="txt"><b id="ringTitle">印尼语</b><span id="ringSub">已掌握 0 / 2,489</span></div>
+    </div>
+
+    <div class="field">
+      <div class="lbl">学哪一本</div>
+      <div class="seg" id="segLang">
+        <button data-lang="id" class="on">印尼语 2,489</button>
+        <button data-lang="en">英语 3,998</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="lbl">这一组背多少个</div>
+      <div class="seg" id="segSize">
+        <button data-n="10">10 个</button>
+        <button data-n="20" class="on">20 个</button>
+        <button data-n="30">30 个</button>
+        <button data-n="50">50 个</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="lbl">范围</div>
+      <div class="seg" id="segScope">
+        <button data-scope="todo" class="on">只背没掌握的</button>
+        <button data-scope="all">全部重新过</button>
+      </div>
+    </div>
+
+    <button class="go" id="start">开始</button>
+    <p class="sub" style="margin-top:20px;font-size:12.5px">进度只存在这台设备上，换个手机不会同步。</p>
+  </section>
+
+  <!-- 学习 -->
+  <section class="study" id="study">
+    <div class="sbar">
+      <button class="iconbtn" id="quit" aria-label="退出">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="pbar"><i id="pbar"></i></div>
+      <div class="cnt" id="cnt">0 / 0</div>
+    </div>
+
+    <div class="cardstage">
+      <div class="wcard" id="wcard">
+        <div class="w" id="cw">—</div>
+        <div class="sub" id="csub"></div>
+        <div class="cn" id="ccn"></div>
+        <div class="ex" id="cex"><div class="a" id="cexa"></div><div class="b" id="cexb"></div></div>
+        <div class="tag" id="ctag"></div>
+      </div>
+      <button class="playw" id="playw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg> 听这个词</button>
+      <button class="reveal" id="reveal">显示答案</button>
+      <div class="btns" id="btns" style="display:none">
+        <button class="again" id="again">再来一次</button>
+        <button class="known" id="known">记住了</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 本次结束 -->
+  <section class="done" id="done" style="display:none">
+    <h2>这一组完成</h2>
+    <div class="big" id="dCount">0</div>
+    <div class="lbl">个词过了一遍</div>
+    <div class="rows">
+      <div><span>这次记住</span><b id="dKnown">0</b></div>
+      <div><span>需要再练</span><b id="dAgain">0</b></div>
+      <div><span>今日累计</span><b id="dToday">0</b></div>
+      <div><span>连续天数</span><b id="dStreak">0 天</b></div>
+    </div>
+    <button class="go" id="next">再来一组</button>
+    <button class="reveal" id="backHome" style="border-style:solid">回首页</button>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => (n||0).toLocaleString('en-US');
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const today = () => new Date().toISOString().slice(0,10);
+
+let lang = 'id', size = 20, scope = 'todo';
+let data = [], done = new Set(), queue = [], idx = 0, known = 0, again = 0, revealed = false;
+let audioWord = null, audioEx = null;
+
+const ICON_PLAY = document.getElementById('playw');
+
+function doneKey(){ return 'ls_done_' + lang; }
+
+function loadDone(){
+  done = new Set(store.get(doneKey(), []));
+}
+function saveDone(){
+  store.set(doneKey(), [...done]);
+}
+
+function renderRing(){
+  const total = data.length || 1;
+  const n = done.size;
+  const pct = Math.round(n / total * 100);
+  $('dial').style.background = 'conic-gradient(var(--accent) ' + (pct*3.6) + 'deg, var(--line2) 0deg)';
+  $('dialTxt').textContent = pct + '%';
+  $('ringTitle').textContent = lang === 'id' ? '印尼语进度' : '英语进度';
+  $('ringSub').textContent = '已掌握 ' + fmt(n) + ' / ' + fmt(data.length);
+}
+
+function loadLang(l){
+  lang = l;
+  return fetch('data/' + l + '.json').then(r=>r.json()).then(d=>{
+    data = d.map((x,i)=>({...x, i:i+1}));
+    loadDone();
+    renderRing();
+  });
+}
+
+// 设置区交互
+document.querySelectorAll('#segLang button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#segLang button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  loadLang(b.dataset.lang);
+}));
+document.querySelectorAll('#segSize button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#segSize button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); size = +b.dataset.n;
+}));
+document.querySelectorAll('#segScope button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#segScope button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); scope = b.dataset.scope;
+}));
+
+function pickWords(){
+  let pool = scope === 'todo' ? data.filter(x=>!done.has(x.i)) : data.slice();
+  // 优先靠前（高频）的词，但加一点随机
+  pool = pool.slice(0, Math.min(pool.length, 1200));
+  for (let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(size, pool.length));
+}
+
+function showCard(){
+  revealed = false;
+  const it = queue[idx];
+  if (!it) return finish();
+  $('cw').textContent = it.w;
+  const sub = (lang === 'id' ? it.py : it.ipa) || '';
+  $('csub').textContent = sub;
+  $('csub').className = 'sub' + (lang === 'en' ? ' ipa' : '');
+  $('ccn').textContent = it.cn;
+  $('cexa').textContent = it.ex || '';
+  $('cexb').textContent = it.exc || '';
+  $('ctag').textContent = it.cat || '';
+  $('wcard').classList.remove('rev');
+  $('reveal').style.display = 'block';
+  $('btns').style.display = 'none';
+  $('cnt').textContent = (idx + 1) + ' / ' + queue.length;
+  $('pbar').style.width = ((idx + 1) / queue.length * 100) + '%';
+  audioWord = new Audio('audio/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
+  audioWord.play().catch(()=>{});
+  audioEx = new Audio('audio/ex/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
+}
+
+$('reveal').addEventListener('click', ()=>{
+  $('wcard').classList.add('rev');
+  $('reveal').style.display = 'none';
+  $('btns').style.display = 'flex';
+  if (audioEx) audioEx.play().catch(()=>{});
+});
+$('playw').addEventListener('click', ()=>{ if (audioWord){ audioWord.currentTime = 0; audioWord.play().catch(()=>{}); } });
+
+$('known').addEventListener('click', ()=>{
+  const it = queue[idx];
+  const wasNew = !done.has(it.i);
+  done.add(it.i); saveDone();
+  if (wasNew) known++;
+  bumpToday(1);
+  nextCard();
+});
+$('again').addEventListener('click', ()=>{
+  again++;
+  const it = queue[idx];
+  done.delete(it.i); saveDone();
+  queue.push(it);            // 排到队尾重考
+  nextCard();
+});
+
+function nextCard(){
+  idx++;
+  $('pbar').style.width = (idx / queue.length * 100) + '%';
+  renderRing();
+  showCard();
+}
+
+function bumpToday(n){
+  const d = store.get('ls_daily', {});
+  const t = today();
+  d[t] = (d[t] || 0) + n;
+  store.set('ls_daily', d);
+  // 连续天数
+  const st = store.get('ls_streak', {last:'', n:0});
+  if (st.last !== t){
+    const y = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    st.n = (st.last === y) ? (st.n + 1) : 1;
+    st.last = t;
+    store.set('ls_streak', st);
+  }
+}
+
+function finish(){
+  $('study').classList.remove('on');
+  $('done').style.display = 'block';
+  const daily = store.get('ls_daily', {})[today()] || 0;
+  const st = store.get('ls_streak', {n:0});
+  $('dCount').textContent = idx;
+  $('dKnown').textContent = known;
+  $('dAgain').textContent = again;
+  $('dToday').textContent = daily;
+  $('dStreak').textContent = (st.n || 0) + ' 天';
+  renderRing();
+}
+
+$('start').addEventListener('click', ()=>{
+  const words = pickWords();
+  if (!words.length){
+    alert(scope === 'todo' ? '这本已经全部掌握了，换成「全部重新过」试试。' : '没有可背的词。');
+    return;
+  }
+  queue = words.slice(); idx = 0; known = 0; again = 0;
+  $('setup').style.display = 'none';
+  $('done').style.display = 'none';
+  $('study').classList.add('on');
+  showCard();
+});
+
+$('quit').addEventListener('click', ()=>{
+  if (idx > 0 && !confirm('这一组还没背完，确定退出？已记住的会保存。')) return;
+  $('study').classList.remove('on');
+  $('setup').style.display = 'block';
+  renderRing();
+});
+
+$('next').addEventListener('click', ()=>{
+  $('done').style.display = 'none';
+  $('setup').style.display = 'block';
+  renderRing();
+});
+$('backHome').addEventListener('click', ()=> location.href = 'index.html');
+
+loadLang('id');
+</script>
+</body>
+</html>

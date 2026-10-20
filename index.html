@@ -17,12 +17,12 @@
   <header class="hero">
     <div class="eyebrow">Bahasa Indonesia · IELTS</div>
     <h1>把词背到<br><em>能开口干活</em>的程度</h1>
-    <p class="lead">印尼语按真实语料词频挑选，覆盖生活与现场；英语取自雅思与学术高频。每个词都有真人发音，学过的点一下打勾，进度存在你自己手机上。</p>
+    <p class="lead">印尼语按真实语料词频挑选，覆盖生活与现场；英语取自雅思与学术高频。每个词配真人发音，外加一条双语例句，学过的点一下打勾，进度存在你自己手机上。</p>
 
     <div class="databar">
       <div><b id="sId">2,500</b><span>印尼语词</span></div>
       <div><b id="sEn">4,000</b><span>雅思核心词</span></div>
-      <div><b>10</b><span>场景对话</span></div>
+      <div><b id="sEx">6,487</b><span>双语例句</span></div>
     </div>
   </header>
 
@@ -30,6 +30,11 @@
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
     <input id="q" type="search" placeholder="搜索印尼语、英语或中文" autocomplete="off" enterkeyhint="search">
   </div>
+
+  <a class="card" href="study.html" style="border-color:var(--accent);background:linear-gradient(180deg,#f8faff,#fff)">
+    <div class="row"><h3>开始背诵</h3><span class="pill" id="todayLess">今日 0 个</span></div>
+    <p>一张一张过：先回忆，再翻面看答案和例句，会了点「记住了」，没把握排到后面重考。每天 20 个，两个月过一遍印尼语。</p>
+  </a>
 
   <div class="section-title"><h2>词表</h2><span class="line"></span></div>
 
@@ -41,12 +46,12 @@
 
   <a class="card" href="list.html?lang=id">
     <div class="row"><h3>印尼语 · 日常全覆盖</h3><span class="pill" id="pId">2,500 词</span></div>
-    <p>问候、吃饭、租房、看病、坐车、买东西，加上装卸、库存、单据、会议这些现场用语。带中文谐音，零基础也能开口。</p>
+    <p>问候、吃饭、租房、看病、坐车、买东西，加上装卸、库存、单据、会议这些现场用语。带中文谐音，每个词一条例句，零基础也能开口。</p>
   </a>
 
   <a class="card" href="list.html?lang=en">
     <div class="row"><h3>英语 · 雅思核心</h3><span class="pill" id="pEn">4,000 词</span></div>
-    <p>雅思高频与学术词，含国际音标，按自然地理、教育、科技、文化等主题归类，听说读写都用得上。</p>
+    <p>雅思高频与学术词，含国际音标，按自然地理、教育、科技、文化等主题归类，每个词一条例句，听说读写都用得上。</p>
   </a>
 
   <div class="section-title"><h2>工具</h2><span class="line"></span></div>
@@ -82,6 +87,7 @@ let totId = 2500, totEn = 3998;
 
 fetch('data/id.json').then(r=>r.json()).then(d=>{
   totId = d.length;
+  window.__exId = d.filter(x=>x.ex).length;
   document.getElementById('sId').textContent = fmt(d.length);
   document.getElementById('pId').textContent = fmt(d.length) + ' 词';
   drawProgress();
@@ -89,6 +95,8 @@ fetch('data/id.json').then(r=>r.json()).then(d=>{
 
 fetch('data/en.json').then(r=>r.json()).then(d=>{
   totEn = d.length;
+  const ex = document.getElementById('sEx');
+  if (ex) ex.textContent = fmt((d.filter(x=>x.ex).length) + (window.__exId || 0));
   document.getElementById('sEn').textContent = fmt(d.length);
   document.getElementById('pEn').textContent = fmt(d.length) + ' 词';
   drawProgress();
@@ -107,6 +115,14 @@ function drawProgress(){
   }catch(e){}
 }
 drawProgress();
+
+try{
+  const daily = JSON.parse(localStorage.getItem('ls_daily') || '{}');
+  const t = new Date().toISOString().slice(0,10);
+  const n = daily[t] || 0;
+  const el = document.getElementById('todayLess');
+  if (el) el.textContent = '今日 ' + n + ' 个';
+}catch(e){}
 
 document.getElementById('q').addEventListener('keydown', e=>{
   if (e.key === 'Enter'){

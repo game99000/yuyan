@@ -126,3 +126,11 @@ footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line2);color:
   .hero h1{font-size:28px}
   .databar b{font-size:18px}
 }
+
+/* ---------- 例句 ---------- */
+.ex{display:flex;gap:7px;align-items:flex-start;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line2)}
+.explay{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.explay.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.extxt{flex:1;min-width:0}
+.exs{display:block;font-size:13.5px;color:#4b5262;line-height:1.5}
+.exc{display:block;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:1px}
