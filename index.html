@@ -4,132 +4,123 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="语言学习包">
-<meta name="theme-color" content="#fafafb">
-<meta name="description" content="印尼语日常 2500 词 + 雅思核心 4000 词，全部真人发音，附带学习进度记录">
-<title>语言学习包 · 印尼语 & 英语</title>
+<meta name="apple-mobile-web-app-title" content="印尼语学习">
+<meta name="theme-color" content="#fbfbfc">
+<meta name="description" content="印尼语 2489 词 + 雅思 3998 词，每个词配例句与真人发音，情景剧练习日常对话">
+<title>印尼语 · 英语 · 学习包</title>
 <link rel="stylesheet" href="assets/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233355d1'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232b46a8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif'%3EA%3C/text%3E%3C/svg%3E">
+<style>
+.today{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:18px 0 12px;display:flex;align-items:center;gap:16px}
+.today .dial{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;position:relative;flex:0 0 auto;background:conic-gradient(var(--accent) 0deg,var(--line2) 0deg)}
+.today .dial i{position:absolute;inset:7px;background:#fff;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12.5px;font-weight:700;color:var(--accent);line-height:1.1;text-align:center}
+.today .info b{display:block;font-size:17px;letter-spacing:-.01em}
+.today .info span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.today .streak{margin-left:auto;text-align:right;font-size:12px;color:var(--muted)}
+.today .streak b{display:block;font-size:19px;color:var(--ink)}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--accent);color:#fff;border-radius:16px;padding:17px 18px;text-decoration:none;box-shadow:0 14px 30px -18px rgba(43,70,168,.8)}
+.cta b{font-size:16.5px;font-weight:650}
+.cta span{display:block;font-size:12.5px;opacity:.85;margin-top:3px}
+.cta .arw{font-size:20px;opacity:.9}
+.grid2{margin-top:12px}
+.total{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-top:12px}
+.total .hd{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2)}
+.total .hd b{font-variant-numeric:tabular-nums}
+.total .bar{height:5px;border-radius:99px;background:var(--line2);margin-top:9px;overflow:hidden}
+.total .bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .4s}
+.total .sub{font-size:11.5px;color:var(--faint);margin-top:7px}
+</style>
 </head>
 <body>
 <div class="wrap">
 
-  <header class="hero">
+  <header class="hero" style="padding:34px 0 0">
     <div class="eyebrow">Bahasa Indonesia · IELTS</div>
-    <h1>把词背到<br><em>能开口干活</em>的程度</h1>
-    <p class="lead">印尼语按真实语料词频挑选，覆盖生活与现场；英语取自雅思与学术高频。每个词配真人发音，外加一条双语例句，学过的点一下打勾，进度存在你自己手机上。</p>
-
-    <div class="databar">
-      <div><b id="sId">2,500</b><span>印尼语词</span></div>
-      <div><b id="sEn">4,000</b><span>雅思核心词</span></div>
-      <div><b id="sEx">6,487</b><span>双语例句</span></div>
-    </div>
+    <h1>今天也来<br><em>练几句</em></h1>
   </header>
 
-  <div class="search">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
-    <input id="q" type="search" placeholder="搜索印尼语、英语或中文" autocomplete="off" enterkeyhint="search">
+  <div class="today">
+    <div class="dial" id="dial"><i id="dialTxt">0<br>个</i></div>
+    <div class="info"><b id="todayTitle">今日还没开始</b><span id="todaySub">目标 20 个 · 一组大约 6 分钟</span></div>
+    <div class="streak"><b id="streak">0</b>连续天数</div>
   </div>
 
-  <a class="card" href="study.html" style="border-color:var(--accent);background:linear-gradient(180deg,#f8faff,#fff)">
-    <div class="row"><h3>开始背诵</h3><span class="pill" id="todayLess">今日 0 个</span></div>
-    <p>一张一张过：先回忆，再翻面看答案和例句，会了点「记住了」，没把握排到后面重考。每天 20 个，两个月过一遍印尼语。</p>
+  <a class="cta" href="study.html">
+    <div><b>开始背一组</b><span>卡片式记忆 · 会了打勾，没把握重考</span></div>
+    <div class="arw">→</div>
   </a>
 
-  <div class="section-title"><h2>词表</h2><span class="line"></span></div>
-
-  <div class="progress-card">
-    <div class="hd"><b>我的学习进度</b><span id="pdText">0 / 6,498</span></div>
-    <div class="bar"><i id="pdBar"></i></div>
-    <div class="foot" id="pdFoot">还没开始。打开词表，学过的词点右侧的对勾。</div>
-  </div>
-
-  <a class="card" href="list.html?lang=id">
-    <div class="row"><h3>印尼语 · 日常全覆盖</h3><span class="pill" id="pId">2,500 词</span></div>
-    <p>问候、吃饭、租房、看病、坐车、买东西，加上装卸、库存、单据、会议这些现场用语。带中文谐音，每个词一条例句，零基础也能开口。</p>
-  </a>
-
-  <a class="card" href="list.html?lang=en">
-    <div class="row"><h3>英语 · 雅思核心</h3><span class="pill" id="pEn">4,000 词</span></div>
-    <p>雅思高频与学术词，含国际音标，按自然地理、教育、科技、文化等主题归类，每个词一条例句，听说读写都用得上。</p>
-  </a>
-
-  <div class="section-title"><h2>工具</h2><span class="line"></span></div>
+  <div class="section-title"><h2>四个模块</h2><span class="line"></span></div>
   <div class="grid2">
-    <a class="tool" href="scenes.html">
+    <a class="tool" href="list.html?lang=id">
+      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg></span>
+      <b>印尼语词表</b><span id="idCount">2,489 词 · 带例句</span>
+    </a>
+    <a class="tool" href="list.html?lang=en">
+      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg></span>
+      <b>雅思词表</b><span id="enCount">3,998 词 · 带音标</span>
+    </a>
+    <a class="tool" href="scenes.html" style="grid-column:1 / -1">
       <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg></span>
-      <b>场景对话</b><span>10 个真实场景，逐句发音</span>
-    </a>
-    <a class="tool" href="classic.html">
-      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-      <b>精讲版</b><span>429 词带例句与对话</span>
-    </a>
-    <a class="tool" href="语言学习-打印版.pdf">
-      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h3"/></svg></span>
-      <b>打印版 PDF</b><span>36 页，可离线打印</span>
-    </a>
-    <a class="tool" href="classic.html#grammar">
-      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 3v5"/><path d="M17 3v5"/><path d="M5 21h14"/></svg></span>
-      <b>语法速成</b><span>一页看懂印尼语</span>
+      <b>情景剧 · 小王在印尼的第一个月</b><span>16 集连续剧情，覆盖日常与工地对话，逐句发音</span>
     </a>
   </div>
 
-  <footer>
-    语言学习包 · 物流管培生定制<br>
-    先听三遍再跟读，一天二十个词，两个月能覆盖日常
-  </footer>
+  <div class="total">
+    <div class="hd"><span>我的总进度</span><b id="totTxt">0 / 6,487</b></div>
+    <div class="bar"><i id="totBar"></i></div>
+    <div class="sub" id="totSub">进度只存在这台设备上，换手机不同步</div>
+  </div>
+
+  <div class="section-title"><h2>更多</h2><span class="line"></span></div>
+  <div class="grid2">
+    <a class="tool" href="classic.html"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><b>精讲版</b><span>429 词带语法</span></a>
+    <a class="tool" href="语言学习-打印版.pdf"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><b>打印版 PDF</b><span>36 页</span></a>
+  </div>
+
+  <footer>语言学习包 · 物流管培生定制</footer>
 </div>
 
-<script>
-const fmt = n => n.toLocaleString('en-US');
+<nav class="tabbar">
+  <a href="index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页</a>
+  <a href="list.html?lang=id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>词表</a>
+  <a href="study.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M8 7h8M8 11h6"/></svg>背诵</a>
+  <a href="scenes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>情景</a>
+</nav>
 
-let totId = 2500, totEn = 3998;
+<script>
+const fmt = n => (n||0).toLocaleString('en-US');
+const GOAL = 20;
+const t = new Date().toISOString().slice(0,10);
+
+let daily = {}, st = {n:0};
+try{ daily = JSON.parse(localStorage.getItem('ls_daily') || '{}'); }catch(e){}
+try{ st = JSON.parse(localStorage.getItem('ls_streak') || '{"n":0}'); }catch(e){}
+const n = daily[t] || 0;
+const pct = Math.min(100, Math.round(n / GOAL * 100));
+
+document.getElementById('dial').style.background = 'conic-gradient(var(--accent) ' + (pct*3.6) + 'deg, var(--line2) 0deg)';
+document.getElementById('dialTxt').innerHTML = n + '<br>个';
+document.getElementById('todayTitle').textContent = n ? ('今天已经背了 ' + n + ' 个') : '今日还没开始';
+document.getElementById('todaySub').textContent = n
+  ? ('目标 ' + GOAL + ' 个 · ' + (n >= GOAL ? '已达标，可以再来一组' : '还差 ' + (GOAL - n) + ' 个'))
+  : ('目标 ' + GOAL + ' 个 · 一组大约 6 分钟');
+document.getElementById('streak').textContent = st.n || 0;
+
+function readDone(k){ try{ return JSON.parse(localStorage.getItem(k) || '[]').length; }catch(e){ return 0; } }
+const a = readDone('ls_done_id'), b = readDone('ls_done_en');
 
 fetch('data/id.json').then(r=>r.json()).then(d=>{
-  totId = d.length;
-  window.__exId = d.filter(x=>x.ex).length;
-  document.getElementById('sId').textContent = fmt(d.length);
-  document.getElementById('pId').textContent = fmt(d.length) + ' 词';
-  drawProgress();
+  const tot = d.length + 3998;
+  document.getElementById('idCount').textContent = fmt(d.length) + ' 词 · 带例句';
+  document.getElementById('totTxt').textContent = fmt(a + b) + ' / ' + fmt(tot);
+  document.getElementById('totBar').style.width = ((a+b)/tot*100).toFixed(2) + '%';
+  if (a+b) document.getElementById('totSub').textContent = '印尼语 ' + fmt(a) + ' · 英语 ' + fmt(b) + '，继续加油';
 }).catch(()=>{});
 
 fetch('data/en.json').then(r=>r.json()).then(d=>{
-  totEn = d.length;
-  const ex = document.getElementById('sEx');
-  if (ex) ex.textContent = fmt((d.filter(x=>x.ex).length) + (window.__exId || 0));
-  document.getElementById('sEn').textContent = fmt(d.length);
-  document.getElementById('pEn').textContent = fmt(d.length) + ' 词';
-  drawProgress();
+  document.getElementById('enCount').textContent = fmt(d.length) + ' 词 · 带音标';
 }).catch(()=>{});
-
-function drawProgress(){
-  try{
-    const a = JSON.parse(localStorage.getItem('ls_done_id') || '[]').length;
-    const b = JSON.parse(localStorage.getItem('ls_done_en') || '[]').length;
-    const total = totId + totEn, n = a + b;
-    document.getElementById('pdText').textContent = fmt(n) + ' / ' + fmt(total);
-    document.getElementById('pdBar').style.width = (n / total * 100).toFixed(2) + '%';
-    document.getElementById('pdFoot').textContent = n
-      ? '印尼语 ' + fmt(a) + ' 个 · 英语 ' + fmt(b) + ' 个。每天二十个，一年能过一遍。'
-      : '还没开始。打开词表，学过的词点右侧的对勾。';
-  }catch(e){}
-}
-drawProgress();
-
-try{
-  const daily = JSON.parse(localStorage.getItem('ls_daily') || '{}');
-  const t = new Date().toISOString().slice(0,10);
-  const n = daily[t] || 0;
-  const el = document.getElementById('todayLess');
-  if (el) el.textContent = '今日 ' + n + ' 个';
-}catch(e){}
-
-document.getElementById('q').addEventListener('keydown', e=>{
-  if (e.key === 'Enter'){
-    const v = e.target.value.trim();
-    if (v) location.href = 'list.html?lang=id&q=' + encodeURIComponent(v);
-  }
-});
 </script>
 </body>
 </html>

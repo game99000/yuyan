@@ -3,162 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#fafafb">
-<title>场景对话 · 语言学习包</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fbfbfc">
+<title>情景剧 · 语言学习包</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
-.scene{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 18px 10px;margin-bottom:14px;box-shadow:var(--sh1)}
-.scene h3{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
-.scene .note{margin:0 0 12px;color:var(--muted);font-size:13px}
-.line{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2)}
-.line:first-of-type{border-top:none}
-.line .who{flex:0 0 22px;color:var(--faint);font-size:12.5px;font-weight:600;padding-top:2px}
-.line .body{flex:1;min-width:0}
-.line .id{font-size:15.5px;line-height:1.45}
-.line .cn{color:var(--muted);font-size:13.5px;margin-top:2px}
-.line button{flex:0 0 auto;align-self:flex-start;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
-.line button:active{background:var(--accent-soft)}
-.hint{background:var(--amber-soft);border:1px solid #f2e3c3;border-radius:var(--r);padding:12px 14px;font-size:13.5px;color:#6b4e00;margin:4px 0 18px}
+.eplist{padding-top:22px}
+.eplist h1{margin:0 0 6px;font-size:24px;letter-spacing:-.02em}
+.eplist p.sub{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.6}
+.ephead{padding:22px 0 10px}
+.ephead .kicker{font-size:12px;letter-spacing:.14em;color:var(--accent);font-weight:600;text-transform:uppercase}
+.ephead h1{margin:8px 0 6px;font-size:23px;letter-spacing:-.02em}
+.ephead p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6}
+.dlg{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px 16px;margin:14px 0}
+.navrow{display:flex;gap:10px;margin:16px 0 8px}
+.navrow a{flex:1;text-align:center;text-decoration:none;font-size:14px;padding:12px;border-radius:12px;border:1px solid var(--line);color:var(--ink2);background:#fff}
+.navrow a.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.whoA{background:#eef1fe;color:#2b46a8}
+.whoB{background:#eef7f1;color:#0d7a56}
+.whoC{background:#fdf3ea;color:#8a5a00}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div style="padding:26px 0 6px">
-    <div class="eyebrow" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px">
-      Percakapan Sehari-hari
-    </div>
-    <h1 style="margin:0;font-size:27px;letter-spacing:-.02em">场景对话</h1>
-    <p style="margin:8px 0 18px;color:var(--ink2);font-size:14.5px">十个最常用的场景，每句都能点着听。先把整段听懂，再跟着说，最后自己替换里面的词。</p>
-  </div>
+<div class="wrap" id="app"></div>
 
-  <div class="hint">发音用的是手机自带的印尼语音色（iOS 那个叫 Damayanti，安卓是 Google 语音）。如果没有声音，去手机设置里把「印尼语」的语音包装上。</div>
+<nav class="tabbar">
+  <a href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页</a>
+  <a href="list.html?lang=id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>词表</a>
+  <a href="study.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M8 7h8M8 11h6"/></svg>背诵</a>
+  <a href="scenes.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>情景</a>
+</nav>
 
-  <div id="scenes"></div>
-
-  <footer>
-    语言学习包 · 场景对话<br>
-    <a href="index.html" style="color:var(--accent);text-decoration:none">← 返回首页</a>
-  </footer>
-</div>
-
+<audio id="player"></audio>
 <script>
-const ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
+const $app = document.getElementById('app');
+const player = document.getElementById('player');
+const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
-const DATA = [
-  {t:'打招呼与自我介绍', note:'第一次见面，客气一点，用 Pak（先生）/ Bu（女士）', lines:[
-    ['A','Selamat pagi, Pak. Saya Budi, dari Cina.','早上好，先生。我是布迪，来自中国。'],
-    ['B','Selamat pagi. Ada yang bisa saya bantu?','早上好，有什么我可以帮您？'],
-    ['A','Saya anak baru di bagian logistik.','我是物流部门的新人。'],
-    ['B','Oh, selamat bergabung. Kantornya di lantai dua.','欢迎加入。办公室在二楼。'],
-    ['A','Terima kasih. Nanti saya minta bantuan kalau ada yang tidak mengerti.','谢谢，有不懂的我再请教您。'],
-    ['B','Silakan. Kalau butuh sesuatu, bicara saja.','别客气，需要什么就说。']
-  ]},
-  {t:'仓库交接', note:'现场最高频的一段，重点记数字和单位', lines:[
-    ['A','Truk sudah datang?','卡车到了吗？'],
-    ['B','Sudah, sekarang di pintu masuk.','到了，现在在入口。'],
-    ['A','Berapa kontainer yang datang?','来几个集装箱？'],
-    ['B','Tiga kontainer, masing-masing dua puluh ton.','三个，每个二十吨。'],
-    ['A','Oke, saya siapkan alat beratnya.','好，我去准备机具。'],
-    ['B','Hati-hati, lantainya licin.','小心，地面很滑。']
-  ]},
-  {t:'点餐', note:'最实用的一课，吃饱了再谈别的', lines:[
-    ['A','Menu, tolong.','请给我菜单。'],
-    ['B','Ini, Pak.','给您，先生。'],
-    ['A','Saya mau nasi goreng dan es teh.','我要炒饭和冰茶。'],
-    ['B','Mau pedas?','要辣吗？'],
-    ['A','Sedikit saja.','一点点就好。'],
-    ['B','Baik, tunggu sebentar.','好的，请稍等。']
-  ]},
-  {t:'打车与坐摩的', note:'Ojek 是摩托车，比出租车便宜，记得先讲价', lines:[
-    ['A','Ke pelabuhan berapa?','去港口多少钱？'],
-    ['B','Lima puluh ribu.','五万。'],
-    ['A','Bisa kurang?','能便宜点吗？'],
-    ['B','Empat puluh lima, ya.','四万五吧。'],
-    ['A','Oke, antar ke gerbang belakang.','好，送到后门。'],
-    ['B','Siap.','没问题。']
-  ]},
-  {t:'租房看房', note:'问价一定要确认水电是否含在房租里', lines:[
-    ['A','Saya mau lihat kamar yang kosong.','我想看看空着的房间。'],
-    ['B','Ini, ada kamar mandi dalam.','这间，有独立卫生间。'],
-    ['A','Berapa sebulan?','一个月多少？'],
-    ['B','Dua juta, sudah termasuk listrik.','两百万，含电费。'],
-    ['A','Boleh lihat dapur?','可以看看厨房吗？'],
-    ['B','Mari, saya antar.','来，我带您看。']
-  ]},
-  {t:'看病买药', note:'记住 sakit（疼）、demam（发烧）、obat（药）这三个词', lines:[
-    ['A','Saya sakit perut sejak kemarin.','我从昨天开始肚子疼。'],
-    ['B','Sudah minum obat?','吃药了吗？'],
-    ['A','Belum. Saya juga demam.','还没有。我还发烧。'],
-    ['B','Kalau begitu, jangan makan pedas dulu.','那先别吃辣的。'],
-    ['A','Baik, saya mau beli obat di apotek.','好的，我去药店买药。'],
-    ['B','Ini resepnya, serahkan ke apotek.','这是处方，交给药店。']
-  ]},
-  {t:'市场砍价', note:'印尼市场可以还价，但别太狠，笑着讲', lines:[
-    ['A','Ini berapa?','这个多少钱？'],
-    ['B','Delapan puluh ribu.','八万。'],
-    ['A','Mahal sekali. Lima puluh bisa?','太贵了。五万行吗？'],
-    ['B','Enam puluh, harga akhir.','六万，最后价。'],
-    ['A','Oke, saya ambil dua.','好，我拿两个。'],
-    ['B','Terima kasih, Pak.','谢谢您。']
-  ]},
-  {t:'打电话找同事', note:'电话里先说“Halo, ini + 名字”，对方才知道你是谁', lines:[
-    ['A','Halo, ini Andi. Bisa bicara dengan Pak Wang?','喂，我是安迪。能和王先生通话吗？'],
-    ['B','Sebentar, saya sambungkan.','稍等，我转过去。'],
-    ['A','Pak, barang untuk besok sudah siap?','先生，明天那批货准备好了吗？'],
-    ['C','Belum semua. Satu truk masih di jalan.','还没全部，有一车还在路上。'],
-    ['A','Jam berapa sampai?','几点到？'],
-    ['C','Sekitar jam empat sore.','大约下午四点。']
-  ]},
-  {t:'迟到与请假', note:'印尼同事很看重“先说明”，别不吭声', lines:[
-    ['A','Pak, hari ini saya terlambat.','先生，我今天迟到了。'],
-    ['B','Kenapa?','为什么？'],
-    ['A','Ban motor saya bocor.','我摩托车爆胎了。'],
-    ['B','Sudah sampai?','到了吗？'],
-    ['A','Sudah, saya langsung ke gudang.','到了，我直接去仓库。']
-  ]},
-  {t:'单据与数量确认', note:'卸货前把 surat jalan（送货单）核清楚，少一件都要当场说', lines:[
-    ['A','Surat jalan sudah diisi?','送货单填好了吗？'],
-    ['B','Sudah, jumlahnya dua belas karton.','填好了，十二箱。'],
-    ['A','Berat kotornya berapa?','毛重多少？'],
-    ['B','Tiga ratus kilogram.','三百公斤。'],
-    ['A','Cek lagi, ya. Kemarin kurang satu.','再核对一下，昨天少了一个。'],
-    ['B','Baik, saya hitung ulang.','好，我重算。']
-  ]}
-];
+let EPISODES = [];
+let doneSet = new Set();
+try{ doneSet = new Set(JSON.parse(localStorage.getItem('ls_done_dlg') || '[]')); }catch(e){}
 
-const box = document.getElementById('scenes');
-let voice = null;
-function pickVoice(){
-  const vs = speechSynthesis.getVoices();
-  voice = vs.find(v=>v.lang && v.lang.toLowerCase().startsWith('id')) || null;
+function playEp(ep, li, btn){
+  player.pause();
+  player.src = 'audio/dlg/' + String(ep).padStart(2,'0') + '-' + String(li).padStart(2,'0') + '.mp3';
+  document.querySelectorAll('.line2 button.on').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  player.play().catch(()=>{});
+  player.onended = ()=> btn.classList.remove('on');
 }
-pickVoice();
-speechSynthesis.onvoiceschanged = pickVoice;
 
-DATA.forEach((sc, si)=>{
-  const el = document.createElement('section');
-  el.className = 'scene';
-  el.innerHTML = '<h3>' + (si+1) + ' · ' + sc.t + '</h3><p class="note">' + sc.note + '</p>';
-  sc.lines.forEach((ln, li)=>{
-    const d = document.createElement('div');
-    d.className = 'line';
-    d.innerHTML = '<div class="who">' + ln[0] + '</div>'
-      + '<div class="body"><div class="id">' + ln[1] + '</div><div class="cn">' + ln[2] + '</div></div>'
-      + '<button aria-label="播放">' + ICON + '</button>';
-    const btn = d.querySelector('button');
-    btn.addEventListener('click', ()=>{
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(ln[1]);
-      u.lang = 'id-ID';
-      if (voice) u.voice = voice;
-      u.rate = 0.9;
-      speechSynthesis.speak(u);
-      btn.style.background = 'var(--accent-soft)';
-      u.onend = ()=> btn.style.background = '';
-    });
-    el.appendChild(d);
+function renderList(){
+  const cards = EPISODES.map(e=>{
+    const done = doneSet.has(e.ep);
+    return '<a class="ep' + (done?' done':'') + '" href="#ep' + e.ep + '">'
+      + '<div class="no">' + (done ? '✓' : e.ep) + '</div>'
+      + '<div class="body"><div class="t">' + esc(e.title) + '</div>'
+      + '<div class="d">' + esc(e.intro) + '</div>'
+      + '<div class="n">' + (e.lines ? e.lines.length : 0) + ' 句对话</div></div></a>';
+  }).join('');
+
+  $app.innerHTML = '<section class="eplist">'
+    + '<div class="eyebrow" style="font-size:12px;letter-spacing:.14em;color:var(--accent);font-weight:600;text-transform:uppercase;margin-bottom:12px">Drama · 16 Episodes</div>'
+    + '<h1>小王在印尼的第一个月</h1>'
+    + '<p class="sub">跟着一个刚毕业的物流管培生，从下飞机到独立带班。每集 10~14 句，都是真会用上的话，点每句右边的小三角单独听。</p>'
+    + cards + '</section>';
+}
+
+function renderEp(no){
+  const e = EPISODES.find(x=>x.ep === +no);
+  if (!e) return renderList();
+  const lines = (e.lines||[]).map((ln, i)=>{
+    const who = ln.who || 'A';
+    return '<div class="line2"><div class="who who' + who + '">' + who + '</div>'
+      + '<div class="txt"><div class="id">' + esc(ln.id) + '</div><div class="cn">' + esc(ln.cn) + '</div></div>'
+      + '<button data-ep="' + e.ep + '" data-li="' + (i+1) + '" aria-label="播放">' + ICON + '</button></div>';
+  }).join('');
+
+  const keys = (e.keys||[]).map(k=>'<span>' + esc(k) + '</span>').join('');
+  const prev = e.ep > 1 ? '<a href="#ep' + (e.ep-1) + '">← 上一集</a>' : '<a href="#">全部剧集</a>';
+  const next = EPISODES.some(x=>x.ep === e.ep + 1)
+    ? '<a class="primary" href="#ep' + (e.ep+1) + '">下一集 →</a>'
+    : '<a class="primary" href="#">回到列表</a>';
+
+  $app.innerHTML = '<section class="ephead">'
+    + '<div class="kicker">Episode ' + e.ep + ' / ' + EPISODES.length + '</div>'
+    + '<h1>' + esc(e.title) + '</h1><p>' + esc(e.intro || '') + '</p></section>'
+    + '<div class="dlg">' + lines + '</div>'
+    + (keys ? '<div class="keys">' + keys + '</div>' : '')
+    + '<div class="navrow">' + prev + next + '</div>'
+    + '<div style="text-align:center;margin-top:14px"><button class="reveal" id="markDone" style="max-width:280px;margin:0 auto;border-style:solid">'
+    + (doneSet.has(e.ep) ? '✓ 本集已练过' : '标记这一集练过了') + '</button></div>';
+
+  document.querySelectorAll('.line2 button').forEach(b=>{
+    b.addEventListener('click', ()=> playEp(b.dataset.ep, b.dataset.li, b));
   });
-  box.appendChild(el);
+  const mk = document.getElementById('markDone');
+  mk.addEventListener('click', ()=>{
+    if (doneSet.has(e.ep)) doneSet.delete(e.ep); else doneSet.add(e.ep);
+    try{ localStorage.setItem('ls_done_dlg', JSON.stringify([...doneSet])); }catch(err){}
+    mk.textContent = doneSet.has(e.ep) ? '✓ 本集已练过' : '标记这一集练过了';
+  });
+  window.scrollTo({top:0});
+}
+
+function route(){
+  const m = location.hash.match(/^#ep(\d+)$/);
+  if (m) renderEp(m[1]); else renderList();
+}
+window.addEventListener('hashchange', route);
+
+fetch('data/scenes.json').then(r=>r.json()).then(d=>{
+  EPISODES = d.sort((a,b)=>a.ep-b.ep);
+  route();
+}).catch(()=>{
+  $app.innerHTML = '<div class="empty">剧本加载失败，请刷新</div>';
 });
 </script>
 </body>

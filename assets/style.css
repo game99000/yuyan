@@ -134,3 +134,35 @@ footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line2);color:
 .extxt{flex:1;min-width:0}
 .exs{display:block;font-size:13.5px;color:#4b5262;line-height:1.5}
 .exc{display:block;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:1px}
+
+/* ---------- 应用外壳：底部导航 ---------- */
+body{padding-bottom:74px}
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;
+  background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+  border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--muted);font-size:10.5px;letter-spacing:.02em;padding:5px 0 4px;border-radius:10px;transition:color .15s}
+.tabbar a.on{color:var(--accent);font-weight:600}
+.tabbar svg{width:21px;height:21px;stroke-width:1.7}
+.tabbar.hide{display:none}
+
+/* ---------- 情景剧 ---------- */
+.ep{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:9px;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .16s}
+.ep:hover{border-color:#d8dde7;box-shadow:var(--sh2)}
+.ep .no{flex:0 0 34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.ep .body{flex:1;min-width:0}
+.ep .t{font-size:15.5px;font-weight:650;letter-spacing:-.01em}
+.ep .d{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+.ep .n{font-size:11.5px;color:var(--faint);margin-top:5px}
+.ep.done .no{background:var(--ok-soft);color:var(--ok)}
+.line2{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line2);align-items:flex-start}
+.line2:first-child{border-top:0}
+.line2 .who{flex:0 0 26px;height:26px;border-radius:8px;background:#f3f5f9;color:var(--ink2);display:grid;place-items:center;font-size:11.5px;font-weight:700}
+.line2 .txt{flex:1;min-width:0}
+.line2 .id{font-size:15px;line-height:1.5}
+.line2 .cn{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45}
+.line2 button{flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--accent);display:grid;place-items:center;cursor:pointer}
+.line2 button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.keys{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.keys span{font-size:12px;color:var(--ink2);background:#f5f6f9;border:1px solid var(--line2);padding:4px 9px;border-radius:7px}
