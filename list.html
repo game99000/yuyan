@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fafafb">
+<title>词表 · 语言学习包</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233355d1'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif'%3EA%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap" style="padding-bottom:60px">
+
+  <div class="topbar">
+    <div class="r1">
+      <a class="iconbtn" href="index.html" aria-label="返回">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <div class="searchbox">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+        <input id="q" type="search" placeholder="搜索词、谐音或中文" autocomplete="off">
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="progress">
+    <span id="ptext">已掌握 0</span>
+    <span class="bar"><i id="pbar"></i></span>
+    <span id="pct">0%</span>
+  </div>
+
+  <div class="status" id="status">加载中…</div>
+  <div id="list"></div>
+  <button class="more" id="more" style="display:none">加载更多</button>
+</div>
+<audio id="player"></audio>
+
+<script>
+const params = new URLSearchParams(location.search);
+const lang = params.get('lang') === 'en' ? 'en' : 'id';
+const PER = 60;
+const KEY = 'ls_done_' + lang;
+
+let all = [], view = [], shown = 0, cat = '全部', onlyTodo = false;
+let done = new Set();
+try{ done = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); }catch(e){}
+
+const elList = document.getElementById('list');
+const elStatus = document.getElementById('status');
+const elMore = document.getElementById('more');
+const elChips = document.getElementById('chips');
+const elQ = document.getElementById('q');
+const player = document.getElementById('player');
+
+if (params.get('q')) elQ.value = params.get('q');
+
+const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
+const ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify([...done])); }catch(e){}
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = all.length || 1;
+  const n = done.size;
+  document.getElementById('ptext').textContent = '已掌握 ' + n;
+  document.getElementById('pct').textContent = Math.round(n / total * 100) + '%';
+  document.getElementById('pbar').style.width = (n / total * 100) + '%';
+}
+
+function play(idx, btn){
+  player.pause();
+  player.src = 'audio/' + lang + '/' + String(idx).padStart(4,'0') + '.mp3';
+  document.querySelectorAll('.act.play.playing').forEach(b=>b.classList.remove('playing'));
+  btn.classList.add('playing');
+  player.play().catch(()=>{});
+  player.onended = ()=> btn.classList.remove('playing');
+}
+
+function renderChunk(){
+  const end = Math.min(shown + PER, view.length);
+  const frag = document.createDocumentFragment();
+  for (let i = shown; i < end; i++){
+    const it = view[i];
+    const sub = (lang === 'id' ? it.py : it.ipa) || '';
+    const isDone = done.has(it.i);
+    const d = document.createElement('div');
+    d.className = 'item' + (isDone ? ' done' : '');
+    d.innerHTML =
+      '<div class="top"><div class="main">'
+      + '<div class="w"><span class="idx">' + it.i + '</span>' + esc(it.w) + '</div>'
+      + (sub ? '<div class="sub' + (lang === 'en' ? ' ipa' : '') + '">' + esc(sub) + '</div>' : '')
+      + '<div class="cn">' + esc(it.cn) + '</div>'
+      + '<div class="meta">' + (it.cat ? '<span class="tag">' + esc(it.cat) + '</span>' : '') + '</div>'
+      + '</div><div class="acts">'
+      + '<button class="act play" aria-label="播放">' + ICON_PLAY + '</button>'
+      + '<button class="act check' + (isDone ? ' on' : '') + '" aria-label="标记已掌握">' + ICON_CHECK + '</button>'
+      + '</div></div>';
+    const btnPlay = d.querySelector('.act.play');
+    const btnCheck = d.querySelector('.act.check');
+    btnPlay.addEventListener('click', ()=> play(it.i, btnPlay));
+    btnCheck.addEventListener('click', ()=>{
+      if (done.has(it.i)) done.delete(it.i); else done.add(it.i);
+      btnCheck.classList.toggle('on');
+      d.classList.toggle('done');
+      save();
+      if (onlyTodo && done.has(it.i)) d.remove();
+    });
+    frag.appendChild(d);
+  }
+  elList.appendChild(frag);
+  shown = end;
+  elMore.style.display = shown < view.length ? 'block' : 'none';
+  elStatus.style.display = view.length ? 'none' : 'block';
+  elStatus.textContent = view.length ? '' : '没有匹配的词';
+}
+
+function applyFilter(){
+  const kw = elQ.value.trim().toLowerCase();
+  view = all.filter(x=>{
+    if (cat !== '全部' && (x.cat||'其他') !== cat) return false;
+    if (onlyTodo && done.has(x.i)) return false;
+    if (!kw) return true;
+    return (x.w + ' ' + (x.py||x.ipa||'') + ' ' + (x.cn||'')).toLowerCase().includes(kw);
+  });
+  elList.innerHTML = '';
+  shown = 0;
+  renderChunk();
+}
+
+function buildChips(){
+  const counts = {};
+  all.forEach(x=>{ const c = x.cat || '其他'; counts[c] = (counts[c]||0)+1; });
+  const names = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  elChips.innerHTML = '';
+
+  const mk = (label, on, fn)=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (on ? ' on' : '');
+    b.textContent = label;
+    b.addEventListener('click', fn);
+    elChips.appendChild(b);
+    return b;
+  };
+
+  mk('全部 ' + all.length, true, ()=>{
+    cat = '全部'; onlyTodo = false;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+    arguments; applyFilter(); buildChips();
+  });
+  mk('未掌握', false, ()=>{
+    onlyTodo = true; cat = '全部';
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+    applyFilter(); buildChips();
+  });
+  names.forEach(n=>{
+    mk(n, cat === n && !onlyTodo, ()=>{
+      cat = n; onlyTodo = false;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      applyFilter(); buildChips();
+    });
+  });
+}
+
+fetch('data/' + lang + '.json').then(r=>r.json()).then(data=>{
+  all = data.map((x,i)=>({...x, i: i+1}));
+  document.title = (lang === 'id' ? '印尼语 ' : '英语 ') + all.length + ' 词 · 语言学习包';
+  updateProgress();
+  buildChips();
+  applyFilter();
+}).catch(()=>{ elStatus.textContent = '词表加载失败，请刷新重试'; });
+
+let t;
+elQ.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(applyFilter, 180); });
+elMore.addEventListener('click', renderChunk);
+window.addEventListener('scroll', ()=>{
+  if (shown >= view.length) return;
+  if (window.innerHeight + window.scrollY > document.body.offsetHeight - 700) renderChunk();
+});
+</script>
+</body>
+</html>

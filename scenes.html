@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fafafb">
+<title>场景对话 · 语言学习包</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.scene{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 18px 10px;margin-bottom:14px;box-shadow:var(--sh1)}
+.scene h3{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
+.scene .note{margin:0 0 12px;color:var(--muted);font-size:13px}
+.line{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2)}
+.line:first-of-type{border-top:none}
+.line .who{flex:0 0 22px;color:var(--faint);font-size:12.5px;font-weight:600;padding-top:2px}
+.line .body{flex:1;min-width:0}
+.line .id{font-size:15.5px;line-height:1.45}
+.line .cn{color:var(--muted);font-size:13.5px;margin-top:2px}
+.line button{flex:0 0 auto;align-self:flex-start;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.line button:active{background:var(--accent-soft)}
+.hint{background:var(--amber-soft);border:1px solid #f2e3c3;border-radius:var(--r);padding:12px 14px;font-size:13.5px;color:#6b4e00;margin:4px 0 18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="padding:26px 0 6px">
+    <div class="eyebrow" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px">
+      Percakapan Sehari-hari
+    </div>
+    <h1 style="margin:0;font-size:27px;letter-spacing:-.02em">场景对话</h1>
+    <p style="margin:8px 0 18px;color:var(--ink2);font-size:14.5px">十个最常用的场景，每句都能点着听。先把整段听懂，再跟着说，最后自己替换里面的词。</p>
+  </div>
+
+  <div class="hint">发音用的是手机自带的印尼语音色（iOS 那个叫 Damayanti，安卓是 Google 语音）。如果没有声音，去手机设置里把「印尼语」的语音包装上。</div>
+
+  <div id="scenes"></div>
+
+  <footer>
+    语言学习包 · 场景对话<br>
+    <a href="index.html" style="color:var(--accent);text-decoration:none">← 返回首页</a>
+  </footer>
+</div>
+
+<script>
+const ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
+
+const DATA = [
+  {t:'打招呼与自我介绍', note:'第一次见面，客气一点，用 Pak（先生）/ Bu（女士）', lines:[
+    ['A','Selamat pagi, Pak. Saya Budi, dari Cina.','早上好，先生。我是布迪，来自中国。'],
+    ['B','Selamat pagi. Ada yang bisa saya bantu?','早上好，有什么我可以帮您？'],
+    ['A','Saya anak baru di bagian logistik.','我是物流部门的新人。'],
+    ['B','Oh, selamat bergabung. Kantornya di lantai dua.','欢迎加入。办公室在二楼。'],
+    ['A','Terima kasih. Nanti saya minta bantuan kalau ada yang tidak mengerti.','谢谢，有不懂的我再请教您。'],
+    ['B','Silakan. Kalau butuh sesuatu, bicara saja.','别客气，需要什么就说。']
+  ]},
+  {t:'仓库交接', note:'现场最高频的一段，重点记数字和单位', lines:[
+    ['A','Truk sudah datang?','卡车到了吗？'],
+    ['B','Sudah, sekarang di pintu masuk.','到了，现在在入口。'],
+    ['A','Berapa kontainer yang datang?','来几个集装箱？'],
+    ['B','Tiga kontainer, masing-masing dua puluh ton.','三个，每个二十吨。'],
+    ['A','Oke, saya siapkan alat beratnya.','好，我去准备机具。'],
+    ['B','Hati-hati, lantainya licin.','小心，地面很滑。']
+  ]},
+  {t:'点餐', note:'最实用的一课，吃饱了再谈别的', lines:[
+    ['A','Menu, tolong.','请给我菜单。'],
+    ['B','Ini, Pak.','给您，先生。'],
+    ['A','Saya mau nasi goreng dan es teh.','我要炒饭和冰茶。'],
+    ['B','Mau pedas?','要辣吗？'],
+    ['A','Sedikit saja.','一点点就好。'],
+    ['B','Baik, tunggu sebentar.','好的，请稍等。']
+  ]},
+  {t:'打车与坐摩的', note:'Ojek 是摩托车，比出租车便宜，记得先讲价', lines:[
+    ['A','Ke pelabuhan berapa?','去港口多少钱？'],
+    ['B','Lima puluh ribu.','五万。'],
+    ['A','Bisa kurang?','能便宜点吗？'],
+    ['B','Empat puluh lima, ya.','四万五吧。'],
+    ['A','Oke, antar ke gerbang belakang.','好，送到后门。'],
+    ['B','Siap.','没问题。']
+  ]},
+  {t:'租房看房', note:'问价一定要确认水电是否含在房租里', lines:[
+    ['A','Saya mau lihat kamar yang kosong.','我想看看空着的房间。'],
+    ['B','Ini, ada kamar mandi dalam.','这间，有独立卫生间。'],
+    ['A','Berapa sebulan?','一个月多少？'],
+    ['B','Dua juta, sudah termasuk listrik.','两百万，含电费。'],
+    ['A','Boleh lihat dapur?','可以看看厨房吗？'],
+    ['B','Mari, saya antar.','来，我带您看。']
+  ]},
+  {t:'看病买药', note:'记住 sakit（疼）、demam（发烧）、obat（药）这三个词', lines:[
+    ['A','Saya sakit perut sejak kemarin.','我从昨天开始肚子疼。'],
+    ['B','Sudah minum obat?','吃药了吗？'],
+    ['A','Belum. Saya juga demam.','还没有。我还发烧。'],
+    ['B','Kalau begitu, jangan makan pedas dulu.','那先别吃辣的。'],
+    ['A','Baik, saya mau beli obat di apotek.','好的，我去药店买药。'],
+    ['B','Ini resepnya, serahkan ke apotek.','这是处方，交给药店。']
+  ]},
+  {t:'市场砍价', note:'印尼市场可以还价，但别太狠，笑着讲', lines:[
+    ['A','Ini berapa?','这个多少钱？'],
+    ['B','Delapan puluh ribu.','八万。'],
+    ['A','Mahal sekali. Lima puluh bisa?','太贵了。五万行吗？'],
+    ['B','Enam puluh, harga akhir.','六万，最后价。'],
+    ['A','Oke, saya ambil dua.','好，我拿两个。'],
+    ['B','Terima kasih, Pak.','谢谢您。']
+  ]},
+  {t:'打电话找同事', note:'电话里先说“Halo, ini + 名字”，对方才知道你是谁', lines:[
+    ['A','Halo, ini Andi. Bisa bicara dengan Pak Wang?','喂，我是安迪。能和王先生通话吗？'],
+    ['B','Sebentar, saya sambungkan.','稍等，我转过去。'],
+    ['A','Pak, barang untuk besok sudah siap?','先生，明天那批货准备好了吗？'],
+    ['C','Belum semua. Satu truk masih di jalan.','还没全部，有一车还在路上。'],
+    ['A','Jam berapa sampai?','几点到？'],
+    ['C','Sekitar jam empat sore.','大约下午四点。']
+  ]},
+  {t:'迟到与请假', note:'印尼同事很看重“先说明”，别不吭声', lines:[
+    ['A','Pak, hari ini saya terlambat.','先生，我今天迟到了。'],
+    ['B','Kenapa?','为什么？'],
+    ['A','Ban motor saya bocor.','我摩托车爆胎了。'],
+    ['B','Sudah sampai?','到了吗？'],
+    ['A','Sudah, saya langsung ke gudang.','到了，我直接去仓库。']
+  ]},
+  {t:'单据与数量确认', note:'卸货前把 surat jalan（送货单）核清楚，少一件都要当场说', lines:[
+    ['A','Surat jalan sudah diisi?','送货单填好了吗？'],
+    ['B','Sudah, jumlahnya dua belas karton.','填好了，十二箱。'],
+    ['A','Berat kotornya berapa?','毛重多少？'],
+    ['B','Tiga ratus kilogram.','三百公斤。'],
+    ['A','Cek lagi, ya. Kemarin kurang satu.','再核对一下，昨天少了一个。'],
+    ['B','Baik, saya hitung ulang.','好，我重算。']
+  ]}
+];
+
+const box = document.getElementById('scenes');
+let voice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>v.lang && v.lang.toLowerCase().startsWith('id')) || null;
+}
+pickVoice();
+speechSynthesis.onvoiceschanged = pickVoice;
+
+DATA.forEach((sc, si)=>{
+  const el = document.createElement('section');
+  el.className = 'scene';
+  el.innerHTML = '<h3>' + (si+1) + ' · ' + sc.t + '</h3><p class="note">' + sc.note + '</p>';
+  sc.lines.forEach((ln, li)=>{
+    const d = document.createElement('div');
+    d.className = 'line';
+    d.innerHTML = '<div class="who">' + ln[0] + '</div>'
+      + '<div class="body"><div class="id">' + ln[1] + '</div><div class="cn">' + ln[2] + '</div></div>'
+      + '<button aria-label="播放">' + ICON + '</button>';
+    const btn = d.querySelector('button');
+    btn.addEventListener('click', ()=>{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(ln[1]);
+      u.lang = 'id-ID';
+      if (voice) u.voice = voice;
+      u.rate = 0.9;
+      speechSynthesis.speak(u);
+      btn.style.background = 'var(--accent-soft)';
+      u.onend = ()=> btn.style.background = '';
+    });
+    el.appendChild(d);
+  });
+  box.appendChild(el);
+});
+</script>
+</body>
+</html>
