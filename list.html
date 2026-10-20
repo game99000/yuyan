@@ -71,7 +71,8 @@ function updateProgress(){
   const total = all.length || 1;
   const n = done.size;
   document.getElementById('ptext').textContent = '已掌握 ' + n;
-  document.getElementById('pct').textContent = Math.round(n / total * 100) + '%';
+  const pctv = n / total * 100;
+  document.getElementById('pct').textContent = (pctv > 0 && pctv < 1) ? '<1%' : Math.round(pctv) + '%';
   document.getElementById('pbar').style.width = (n / total * 100) + '%';
 }
 
@@ -79,8 +80,8 @@ function play(idx, btn){
   player.pause();
   player.src = 'audio/' + lang + '/' + String(idx).padStart(4,'0') + '.mp3';
   document.querySelectorAll('.act.play.playing').forEach(b=>b.classList.remove('playing'));
-  btn.classList.add('playing');
-  player.play().catch(()=>{});
+  document.querySelectorAll('.explay.on').forEach(b=>b.classList.remove('on'));
+  player.play().then(()=> btn.classList.add('playing')).catch(()=> btn.classList.remove('playing'));
   player.onended = ()=> btn.classList.remove('playing');
 }
 
@@ -114,14 +115,17 @@ function renderChunk(){
     const btnEx = d.querySelector('.explay');
     btnPlay.addEventListener('click', ()=> play(it.i, btnPlay));
     if (btnEx){
-      const exAudio = new Audio('audio/ex/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
+      let exAudio = null;
       btnEx.addEventListener('click', ()=>{
+        if (!exAudio){
+          exAudio = new Audio('audio/ex/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
+          exAudio.onended = ()=> btnEx.classList.remove('on');
+        }
+        player.pause();
         document.querySelectorAll('.explay.on').forEach(b=>b.classList.remove('on'));
-        btnEx.classList.add('on');
         exAudio.currentTime = 0;
-        exAudio.play().catch(()=>{});
+        exAudio.play().then(()=> btnEx.classList.add('on')).catch(()=> btnEx.classList.remove('on'));
       });
-      exAudio.onended = ()=> btnEx.classList.remove('on');
     }
     btnCheck.addEventListener('click', ()=>{
       if (done.has(it.i)) done.delete(it.i); else done.add(it.i);
@@ -167,14 +171,12 @@ function buildChips(){
     return b;
   };
 
-  mk('全部 ' + all.length, true, ()=>{
+  mk('全部 ' + all.length, cat === '全部' && !onlyTodo, ()=>{
     cat = '全部'; onlyTodo = false;
-    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-    arguments; applyFilter(); buildChips();
+    applyFilter(); buildChips();
   });
-  mk('未掌握', false, ()=>{
+  mk('未掌握', onlyTodo, ()=>{
     onlyTodo = true; cat = '全部';
-    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
     applyFilter(); buildChips();
   });
   names.forEach(n=>{
@@ -192,17 +194,21 @@ fetch('data/' + lang + '.json').then(r=>r.json()).then(data=>{
   updateProgress();
   buildChips();
   applyFilter();
-}).catch(()=>{ elStatus.textContent = '词表加载失败，请刷新重试'; });
+}).catch(()=>{ elStatus.textContent = location.protocol === 'file:' ? '本地直接双击打不开，请用服务器方式访问（http://）' : '词表加载失败，请刷新重试'; });
 
 let t;
 elQ.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(applyFilter, 180); });
 elMore.addEventListener('click', renderChunk);
-try{
-  const tbLinks = document.querySelectorAll('.tabbar a');
-  tbLinks.forEach(a=>a.classList.remove('on'));
-  const target = document.querySelector('.tabbar a[href^="list.html"]');
-  if (target){ target.classList.add('on'); target.setAttribute('href', 'list.html?lang=' + lang); target.textContent = lang === 'id' ? '印尼语' : '英语'; }
-}catch(e){}
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const target = document.querySelector('.tabbar a[href^="list.html"]');
+    if (target){
+      target.classList.add('on');
+      target.setAttribute('href', 'list.html?lang=' + lang);
+      target.lastChild.textContent = lang === 'id' ? '印尼语' : '英语';
+    }
+  }catch(e){}
+});
 
 window.addEventListener('scroll', ()=>{
   if (shown >= view.length) return;

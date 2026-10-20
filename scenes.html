@@ -49,8 +49,7 @@ function playEp(ep, li, btn){
   player.pause();
   player.src = 'audio/dlg/' + String(ep).padStart(2,'0') + '-' + String(li).padStart(2,'0') + '.mp3';
   document.querySelectorAll('.line2 button.on').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  player.play().catch(()=>{});
+  player.play().then(()=> btn.classList.add('on')).catch(()=> btn.classList.remove('on'));
   player.onended = ()=> btn.classList.remove('on');
 }
 
@@ -89,7 +88,10 @@ function renderEp(no){
 
   $app.innerHTML = '<section class="ephead">'
     + '<div class="kicker">Episode ' + e.ep + ' / ' + EPISODES.length + '</div>'
-    + '<h1>' + esc(e.title) + '</h1><p>' + esc(e.intro || '') + '</p></section>'
+    + '<h1>' + esc(e.title) + '</h1><p>' + esc(e.intro || '') + '</p>'
+    + '<div class="legend"><span><i class="whoW">W</i>小王</span><span><i class="whoS">S</i>Sari</span>'
+    + '<span><i class="whoB">B</i>班长</span><span><i class="whoA">A</i>Andi</span><span><i class="whoG">G</i>其他人</span></div>'
+    + '</section>'
     + '<div class="dlg">' + lines + '</div>'
     + (keys ? '<div class="keys">' + keys + '</div>' : '')
     + '<div class="navrow">' + prev + next + '</div>'
@@ -118,7 +120,7 @@ fetch('data/scenes.json').then(r=>r.json()).then(d=>{
   EPISODES = d.sort((a,b)=>a.ep-b.ep);
   route();
 }).catch(()=>{
-  $app.innerHTML = '<div class="empty">剧本加载失败，请刷新</div>';
+  $app.innerHTML = '<div class="empty">' + (location.protocol === 'file:' ? '本地双击打不开，请用 http:// 访问' : '剧本加载失败，请刷新') + '</div>';
 });
 </script>
 </body>

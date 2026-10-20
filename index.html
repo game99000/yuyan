@@ -90,8 +90,8 @@
 
 <script>
 const fmt = n => (n||0).toLocaleString('en-US');
-const GOAL = 20;
-const t = new Date().toISOString().slice(0,10);
+let GOAL = parseInt(localStorage.getItem('ls_size') || '20', 10) || 20;
+const t = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 
 let daily = {}, st = {n:0};
 try{ daily = JSON.parse(localStorage.getItem('ls_daily') || '{}'); }catch(e){}
@@ -110,17 +110,16 @@ document.getElementById('streak').textContent = st.n || 0;
 function readDone(k){ try{ return JSON.parse(localStorage.getItem(k) || '[]').length; }catch(e){ return 0; } }
 const a = readDone('ls_done_id'), b = readDone('ls_done_en');
 
-fetch('data/id.json').then(r=>r.json()).then(d=>{
-  const tot = d.length + 3998;
+Promise.all([fetch('data/id.json').then(r=>r.json()), fetch('data/en.json').then(r=>r.json())]).then(([d, e])=>{
+  const tot = d.length + e.length;
+  document.getElementById('enCount').textContent = fmt(e.length) + ' 词 · 带音标';
   document.getElementById('idCount').textContent = fmt(d.length) + ' 词 · 带例句';
   document.getElementById('totTxt').textContent = fmt(a + b) + ' / ' + fmt(tot);
   document.getElementById('totBar').style.width = ((a+b)/tot*100).toFixed(2) + '%';
   if (a+b) document.getElementById('totSub').textContent = '印尼语 ' + fmt(a) + ' · 英语 ' + fmt(b) + '，继续加油';
 }).catch(()=>{});
 
-fetch('data/en.json').then(r=>r.json()).then(d=>{
-  document.getElementById('enCount').textContent = fmt(d.length) + ' 词 · 带音标';
-}).catch(()=>{});
+
 </script>
 </body>
 </html>

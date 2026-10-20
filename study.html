@@ -152,10 +152,11 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-const today = () => new Date().toISOString().slice(0,10);
+const today = () => new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 
-let lang = 'id', size = 20, scope = 'todo';
+let lang = 'id', size = parseInt(localStorage.getItem('ls_size') || '20', 10) || 20, scope = 'todo';
 let data = [], done = new Set(), queue = [], idx = 0, known = 0, again = 0, revealed = false;
+let tries = new Map(), initialTotal = 0, seenCards = new Set(), loading = false;
 let audioWord = null, audioEx = null;
 
 const ICON_PLAY = document.getElementById('playw');
@@ -180,11 +181,14 @@ function renderRing(){
 }
 
 function loadLang(l){
-  lang = l;
+  lang = l; loading = true;
+  const btn = document.getElementById('start'); if (btn) btn.disabled = true;
   return fetch('data/' + l + '.json').then(r=>r.json()).then(d=>{
     data = d.map((x,i)=>({...x, i:i+1}));
     loadDone();
     renderRing();
+    loading = false;
+    if (btn) btn.disabled = false;
   });
 }
 
@@ -197,6 +201,7 @@ document.querySelectorAll('#segLang button').forEach(b=>b.addEventListener('clic
 document.querySelectorAll('#segSize button').forEach(b=>b.addEventListener('click', ()=>{
   document.querySelectorAll('#segSize button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); size = +b.dataset.n;
+  try{ localStorage.setItem('ls_size', size); }catch(e){}
 }));
 document.querySelectorAll('#segScope button').forEach(b=>b.addEventListener('click', ()=>{
   document.querySelectorAll('#segScope button').forEach(x=>x.classList.remove('on'));
@@ -216,6 +221,8 @@ function pickWords(){
 
 function showCard(){
   revealed = false;
+  if (audioWord) { try{ audioWord.pause(); }catch(e){} }
+  if (audioEx) { try{ audioEx.pause(); }catch(e){} }
   const it = queue[idx];
   if (!it) return finish();
   $('cw').textContent = it.w;
@@ -229,14 +236,15 @@ function showCard(){
   $('wcard').classList.remove('rev');
   $('reveal').style.display = 'block';
   $('btns').style.display = 'none';
-  $('cnt').textContent = (idx + 1) + ' / ' + queue.length;
-  $('pbar').style.width = ((idx + 1) / queue.length * 100) + '%';
+  $('cnt').textContent = Math.min(seenCards.size + 1, initialTotal) + ' / ' + initialTotal;
+  $('pbar').style.width = Math.min(100, (seenCards.size) / Math.max(1, initialTotal) * 100) + '%';
   audioWord = new Audio('audio/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
   audioWord.play().catch(()=>{});
   audioEx = new Audio('audio/ex/' + lang + '/' + String(it.i).padStart(4,'0') + '.mp3');
 }
 
 $('reveal').addEventListener('click', ()=>{
+  if (audioWord) { try{ audioWord.pause(); }catch(e){} }
   $('wcard').classList.add('rev');
   $('reveal').style.display = 'none';
   $('btns').style.display = 'flex';
@@ -249,20 +257,22 @@ $('known').addEventListener('click', ()=>{
   const wasNew = !done.has(it.i);
   done.add(it.i); saveDone();
   if (wasNew) known++;
-  bumpToday(1);
+  if (!seenCards.has(it.i)) { seenCards.add(it.i); bumpToday(1); }
   nextCard();
 });
 $('again').addEventListener('click', ()=>{
   again++;
   const it = queue[idx];
-  done.delete(it.i); saveDone();
-  queue.push(it);            // 排到队尾重考
+  const n = (tries.get(it.i) || 0) + 1;
+  tries.set(it.i, n);
+  if (!seenCards.has(it.i)) { seenCards.add(it.i); bumpToday(1); }
+  if (n <= 2) queue.push(it);   // 最多补考 2 次，避免无穷队列
   nextCard();
 });
 
 function nextCard(){
   idx++;
-  $('pbar').style.width = (idx / queue.length * 100) + '%';
+  $('pbar').style.width = Math.min(100, (seenCards.size) / Math.max(1, initialTotal) * 100) + '%';
   renderRing();
   showCard();
 }
@@ -275,7 +285,7 @@ function bumpToday(n){
   // 连续天数
   const st = store.get('ls_streak', {last:'', n:0});
   if (st.last !== t){
-    const y = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    const y = new Date(Date.now() - 86400000 - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
     st.n = (st.last === y) ? (st.n + 1) : 1;
     st.last = t;
     store.set('ls_streak', st);
@@ -288,7 +298,7 @@ function finish(){
   $('done').style.display = 'block';
   const daily = store.get('ls_daily', {})[today()] || 0;
   const st = store.get('ls_streak', {n:0});
-  $('dCount').textContent = idx;
+  $('dCount').textContent = seenCards.size;
   $('dKnown').textContent = known;
   $('dAgain').textContent = again;
   $('dToday').textContent = daily;
@@ -297,12 +307,14 @@ function finish(){
 }
 
 $('start').addEventListener('click', ()=>{
+  if (loading || !data.length) return;
   const words = pickWords();
   if (!words.length){
     alert(scope === 'todo' ? '这本已经全部掌握了，换成「全部重新过」试试。' : '没有可背的词。');
     return;
   }
   queue = words.slice(); idx = 0; known = 0; again = 0;
+  tries = new Map(); seenCards = new Set(); initialTotal = words.length;
   $('setup').style.display = 'none';
   $('done').style.display = 'none';
   $('study').classList.add('on');
@@ -330,8 +342,8 @@ loadLang('id');
 
 <nav class="tabbar" id="tabbar">
   <a href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页</a>
-  <a href="study.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>词表</a>
-  <a href="study.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M8 7h8M8 11h6"/></svg>背诵</a>
+  <a href="list.html?lang=id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>词表</a>
+  <a href="study.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M8 7h8M8 11h6"/></svg>背诵</a>
   <a href="scenes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>情景</a>
 </nav>
 </body>
