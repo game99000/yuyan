@@ -78,26 +78,35 @@
 <script>
 const fmt = n => n.toLocaleString('en-US');
 
+let totId = 2500, totEn = 3998;
+
 fetch('data/id.json').then(r=>r.json()).then(d=>{
+  totId = d.length;
   document.getElementById('sId').textContent = fmt(d.length);
   document.getElementById('pId').textContent = fmt(d.length) + ' 词';
+  drawProgress();
 }).catch(()=>{});
 
 fetch('data/en.json').then(r=>r.json()).then(d=>{
+  totEn = d.length;
   document.getElementById('sEn').textContent = fmt(d.length);
   document.getElementById('pEn').textContent = fmt(d.length) + ' 词';
+  drawProgress();
 }).catch(()=>{});
 
-try{
-  const a = JSON.parse(localStorage.getItem('ls_done_id') || '[]').length;
-  const b = JSON.parse(localStorage.getItem('ls_done_en') || '[]').length;
-  const total = 2500 + 3998, n = a + b;
-  document.getElementById('pdText').textContent = fmt(n) + ' / ' + fmt(total);
-  document.getElementById('pdBar').style.width = (n / total * 100).toFixed(2) + '%';
-  document.getElementById('pdFoot').textContent = n
-    ? '印尼语 ' + fmt(a) + ' 个 · 英语 ' + fmt(b) + ' 个。每天二十个，一年能过一遍。'
-    : '还没开始。打开词表，学过的词点右侧的对勾。';
-}catch(e){}
+function drawProgress(){
+  try{
+    const a = JSON.parse(localStorage.getItem('ls_done_id') || '[]').length;
+    const b = JSON.parse(localStorage.getItem('ls_done_en') || '[]').length;
+    const total = totId + totEn, n = a + b;
+    document.getElementById('pdText').textContent = fmt(n) + ' / ' + fmt(total);
+    document.getElementById('pdBar').style.width = (n / total * 100).toFixed(2) + '%';
+    document.getElementById('pdFoot').textContent = n
+      ? '印尼语 ' + fmt(a) + ' 个 · 英语 ' + fmt(b) + ' 个。每天二十个，一年能过一遍。'
+      : '还没开始。打开词表，学过的词点右侧的对勾。';
+  }catch(e){}
+}
+drawProgress();
 
 document.getElementById('q').addEventListener('keydown', e=>{
   if (e.key === 'Enter'){
